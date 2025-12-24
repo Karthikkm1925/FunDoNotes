@@ -1,0 +1,6 @@
+@FunDoNotes_HostAddress = http://localhost:5163
+
+GET {{FunDoNotes_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
