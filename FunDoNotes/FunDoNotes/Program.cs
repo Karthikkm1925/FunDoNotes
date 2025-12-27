@@ -1,9 +1,13 @@
 
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using FunDoNotes.BusinessLogic.Services;
 using FunDoNotes.DataAccess.Context;
 using FunDoNotes.Middlewares;
 using Microsoft.EntityFrameworkCore;
 using FunDoNotes.BusinessLogic.Interfaces;
+
 
 namespace FunDoNotes
 {
@@ -18,13 +22,66 @@ namespace FunDoNotes
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            //builder.Services.AddSwaggerGen();
 
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+                    Description = "Enter 'Bearer' followed by your JWT token"
+                });
+
+                options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+                {
+                {
+                new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+                },
+                new string[] {}
+                }
+                });
+            });
+
+
+            builder.Services.AddScoped<JwtService>();
             builder.Services.AddScoped<IUserService, UserService>();
+
+
             builder.Services.AddDbContext<FunDoNotesDbContext>(options =>
             options.UseSqlServer(
             builder.Configuration.GetConnectionString("DefaultConnection")
             ));
+
+            var jwtSettings = builder.Configuration.GetSection("Jwt");
+
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+
+                        ValidIssuer = jwtSettings["Issuer"],
+                        ValidAudience = jwtSettings["Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(jwtSettings["Key"])
+                        )
+                    };
+                });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -38,6 +95,8 @@ namespace FunDoNotes
             app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseHttpsRedirection();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 
