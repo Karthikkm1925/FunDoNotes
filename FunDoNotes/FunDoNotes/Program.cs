@@ -55,6 +55,7 @@ namespace FunDoNotes
 
             builder.Services.AddScoped<JwtService>();
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<INoteService, NoteService>();
 
 
             builder.Services.AddDbContext<FunDoNotesDbContext>(options =>

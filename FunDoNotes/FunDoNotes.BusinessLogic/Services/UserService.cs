@@ -59,5 +59,17 @@ namespace FunDoNotes.BusinessLogic.Services
             
             return _jwtService.GenerateToken(user);
         }
+
+        public IEnumerable<Note> GetArchivedNotes(int userId)
+        {
+            return _context.Notes
+                .Where(n =>
+                    n.UserId == userId &&
+                    n.IsArchived &&
+                    !n.IsTrashed)
+                .OrderByDescending(n => n.UpdatedAt)
+                .ToList();
+        }
+
     }
 }
