@@ -4,6 +4,7 @@ using FunDoNotes.DataAccess.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FunDoNotes.DataAccess.Migrations
 {
     [DbContext(typeof(FunDoNotesDbContext))]
-    partial class FunDoNotesDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251229174710_Initial_Create_With_Labels_And_Mapping")]
+    partial class Initial_Create_With_Labels_And_Mapping
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -173,13 +176,13 @@ namespace FunDoNotes.DataAccess.Migrations
             modelBuilder.Entity("FunDoNotes.Model.Entities.NoteLabel", b =>
                 {
                     b.HasOne("FunDoNotes.Model.Entities.Label", "Label")
-                        .WithMany("NoteLabels")
+                        .WithMany()
                         .HasForeignKey("LabelId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("FunDoNotes.Model.Entities.Note", "Note")
-                        .WithMany("NoteLabels")
+                        .WithMany()
                         .HasForeignKey("NoteId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -187,16 +190,6 @@ namespace FunDoNotes.DataAccess.Migrations
                     b.Navigation("Label");
 
                     b.Navigation("Note");
-                });
-
-            modelBuilder.Entity("FunDoNotes.Model.Entities.Label", b =>
-                {
-                    b.Navigation("NoteLabels");
-                });
-
-            modelBuilder.Entity("FunDoNotes.Model.Entities.Note", b =>
-                {
-                    b.Navigation("NoteLabels");
                 });
 #pragma warning restore 612, 618
         }

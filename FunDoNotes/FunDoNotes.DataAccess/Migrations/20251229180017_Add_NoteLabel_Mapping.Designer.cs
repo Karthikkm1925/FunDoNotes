@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FunDoNotes.DataAccess.Migrations
 {
     [DbContext(typeof(FunDoNotesDbContext))]
-    [Migration("20251228065330_AddNotesTable")]
-    partial class AddNotesTable
+    [Migration("20251229180017_Add_NoteLabel_Mapping")]
+    partial class Add_NoteLabel_Mapping
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,34 @@ namespace FunDoNotes.DataAccess.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("FunDoNotes.Model.Entities.Label", b =>
+                {
+                    b.Property<int>("LabelId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LabelId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LabelName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("LabelId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Labels");
+                });
 
             modelBuilder.Entity("FunDoNotes.Model.Entities.Note", b =>
                 {
@@ -70,6 +98,24 @@ namespace FunDoNotes.DataAccess.Migrations
                     b.ToTable("Notes");
                 });
 
+            modelBuilder.Entity("FunDoNotes.Model.Entities.NoteLabel", b =>
+                {
+                    b.Property<int>("NoteId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LabelId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("NoteId", "LabelId");
+
+                    b.HasIndex("LabelId");
+
+                    b.ToTable("NoteLabels");
+                });
+
             modelBuilder.Entity("FunDoNotes.Model.Entities.User", b =>
                 {
                     b.Property<int>("UserId")
@@ -105,6 +151,17 @@ namespace FunDoNotes.DataAccess.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("FunDoNotes.Model.Entities.Label", b =>
+                {
+                    b.HasOne("FunDoNotes.Model.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("FunDoNotes.Model.Entities.Note", b =>
                 {
                     b.HasOne("FunDoNotes.Model.Entities.User", "User")
@@ -114,6 +171,35 @@ namespace FunDoNotes.DataAccess.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("FunDoNotes.Model.Entities.NoteLabel", b =>
+                {
+                    b.HasOne("FunDoNotes.Model.Entities.Label", "Label")
+                        .WithMany("NoteLabels")
+                        .HasForeignKey("LabelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FunDoNotes.Model.Entities.Note", "Note")
+                        .WithMany("NoteLabels")
+                        .HasForeignKey("NoteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Label");
+
+                    b.Navigation("Note");
+                });
+
+            modelBuilder.Entity("FunDoNotes.Model.Entities.Label", b =>
+                {
+                    b.Navigation("NoteLabels");
+                });
+
+            modelBuilder.Entity("FunDoNotes.Model.Entities.Note", b =>
+                {
+                    b.Navigation("NoteLabels");
                 });
 #pragma warning restore 612, 618
         }
