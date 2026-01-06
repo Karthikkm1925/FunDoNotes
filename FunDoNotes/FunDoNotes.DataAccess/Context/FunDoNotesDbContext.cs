@@ -20,6 +20,7 @@ namespace FunDoNotes.DataAccess.Context
 
         public DbSet<Label> Labels { get; set; }
         public DbSet<NoteLabel> NoteLabels { get; set; }
+        public DbSet<Collaborator> Collaborators { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -32,7 +33,7 @@ namespace FunDoNotes.DataAccess.Context
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<NoteLabel>()
-        .HasKey(nl => new { nl.NoteId, nl.LabelId });
+                .HasKey(nl => new { nl.NoteId, nl.LabelId });
 
             modelBuilder.Entity<NoteLabel>()
                 .HasOne(nl => nl.Note)
@@ -43,6 +44,25 @@ namespace FunDoNotes.DataAccess.Context
                 .HasOne(nl => nl.Label)
                 .WithMany(l => l.NoteLabels)
                 .HasForeignKey(nl => nl.LabelId);
+
+            modelBuilder.Entity<Collaborator>()
+                .HasOne(c => c.Note)
+                .WithMany()
+                .HasForeignKey(c => c.NoteId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Collaborator>()
+                .HasOne(c => c.OwnerUser)
+                .WithMany()
+                .HasForeignKey(c => c.OwnerUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Collaborator>()
+                .HasOne(c => c.SharedUser)
+                .WithMany()
+                .HasForeignKey(c => c.SharedUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
         }
 
     }

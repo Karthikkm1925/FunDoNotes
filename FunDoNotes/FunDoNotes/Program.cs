@@ -1,12 +1,14 @@
 
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
+using FunDoNotes.BusinessLogic.Consumers;
+using FunDoNotes.BusinessLogic.Interfaces;
+using FunDoNotes.BusinessLogic.Messaging;
 using FunDoNotes.BusinessLogic.Services;
 using FunDoNotes.DataAccess.Context;
 using FunDoNotes.Middlewares;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using FunDoNotes.BusinessLogic.Interfaces;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 
 namespace FunDoNotes
@@ -57,6 +59,14 @@ namespace FunDoNotes
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<INoteService, NoteService>();
             builder.Services.AddScoped<ILabelService, LabelService>();
+            builder.Services.AddScoped<ICollaboratorService, CollaboratorService>();
+            builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<ICacheService, CacheService>();
+            builder.Services.AddSingleton<IRabbitMqPublisher, RabbitMqPublisher>();
+            builder.Services.AddHostedService<EmailConsumer>();
+
+
+
 
 
 
@@ -84,6 +94,10 @@ namespace FunDoNotes
                         )
                     };
                 });
+            builder.Services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = builder.Configuration["Redis:ConnectionString"];
+            });
 
             var app = builder.Build();
 
